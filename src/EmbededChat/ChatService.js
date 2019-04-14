@@ -86,6 +86,10 @@ const copyTextToClipboard = (text) => {
 }
 
 
+export function buildChatLink(sessionId, nickname){
+  return `www.synaren.com/cloud-chat/chat?session=${sessionId}${nickname ? `&nickname=${nickname}` : ''}`
+}
+
 export function shareLink(sessionId, nickname) {
-  return copyTextToClipboard(`www.synaren.com/cloud-chat/chat?session=${sessionId}&nickname=${nickname}`)
+  return copyTextToClipboard(buildChatLink(sessionId, nickname))
 }

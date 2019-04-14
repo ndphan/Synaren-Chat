@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Comment from './Comment';
 import { ChatContainer, CommentListContainer } from './EmbededChat.styles';
-import { getSession, performSend, shareLink } from './ChatService';
+import { getSession, performSend, shareLink, buildChatLink } from './ChatService';
 import queryString from 'query-string';
 import randomWords from '../Sevices/random-words';
 import moment from 'moment';
@@ -274,6 +274,20 @@ const EmbededChat = (props) => {
         </div>
       </form>
       <hr style={{margin:0, marginTop:"20px"}}></hr>
+      {
+        (messages && messages.length === 0) ? 
+        <div uk-alert="true" style={{position:"absolute"}}>
+          <h3>Your chat session</h3>
+          <p>
+            Share this chat session with others to begin chatting.
+            <br/>
+            You can configure your nickname or change sessions above.
+            <br/>
+            Chat sessions are destroyed after a certain amount of time.
+          </p>
+        </div>
+        : undefined
+      }
       <CommentListContainer id={chatContainerId}>
         <ul className="uk-nav">
           {groupMessages()}
@@ -281,8 +295,8 @@ const EmbededChat = (props) => {
       </CommentListContainer>
       <hr/>
       <form onSubmit={e => {e.preventDefault(); sendMessage();}}>
-        <textarea value={newMessage} onChange={e => setNewMessage(e.target.value)} style={{resize:"none",height:"36px"}} className="uk-textarea uk-form-width-medium uk-width-3-4" type="text"></textarea>
-        <button style={{height:"36px"}} className="uk-button uk-button-primary uk-width-1-4">Submit {isLoading ? <div uk-spinner="ratio: 0.5" style={{position:"absolute",padding:"11px 0",paddingLeft: "20px"}}/> : undefined}</button>
+        <textarea value={newMessage} onChange={e => setNewMessage(e.target.value)} style={{resize:"none",height:"36px"}} className="uk-textarea uk-form-width-medium uk-width-3-4@s uk-width-2-4" type="text"></textarea>
+        <button style={{height:"36px"}} className="uk-button uk-button-primary uk-width-1-4@s uk-width-2-4">Submit {isLoading ? <div uk-spinner="ratio: 0.5" style={{position:"absolute",padding:"11px 0",paddingLeft: "20px"}}/> : undefined}</button>
       </form>
     </ChatContainer>
   )

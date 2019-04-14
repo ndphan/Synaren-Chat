@@ -7,6 +7,7 @@ export const RootApp = styled.div`
   min-height: 100vh;
   max-width: 600px;
   margin: auto;
+  max-height: 700px;
 `;
 
 export const FooterVersion = styled.div`
