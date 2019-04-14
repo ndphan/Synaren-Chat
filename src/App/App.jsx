@@ -1,7 +1,6 @@
 import React, { PureComponent } from 'react';
 import { RootApp, FooterVersion } from './App.styles';
 import SynarenBanner from '../SynarenBanner';
-import Chat from '../Chat';
 import { Route } from 'react-router-dom';
 import EmbededChat from '../EmbededChat';
 

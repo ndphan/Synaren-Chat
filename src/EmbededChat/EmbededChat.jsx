@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import PropTypes from 'prop-types';
 import Comment from './Comment';
 import { ChatContainer, CommentListContainer } from './EmbededChat.styles';
 import { getSession, performSend, shareLink } from './ChatService';
@@ -8,6 +7,8 @@ import randomWords from '../Sevices/random-words';
 import moment from 'moment';
 import UIkit from 'uikit';
 import ifvisible from 'ifvisible.js';
+
+ifvisible.setIdleDuration(30);
 
 
 let singleLongPoll;
@@ -104,14 +105,12 @@ const EmbededChat = (props) => {
       clearInterval(singleLongPoll);
     }
     setMessages([]);
-    setError(error);
     showAlert('No session found');
     setIsLoading(false);
   }
 
   const [messages, setMessages] = useState([]);
   const [sessionId, setSessionId] = useState(getSessionId());
-  const [error, setError] = useState();
   const [isloadSession, setIsLoadSession] = useState(true);
   const [nickname, setNickname] = useState(getNickname());
   const [newMessage, setNewMessage] = useState(undefined);
@@ -161,8 +160,8 @@ const EmbededChat = (props) => {
         accordianCount++;
       }
       currentAccordianItems.push(commentFragment);
-      if(index == messages.length - 1) {
-        if(index == messages.length - 1){
+      if(index === messages.length - 1) {
+        if(index === messages.length - 1){
           messageComponent.push(
             <li className="uk-parent" key={accordianCount}>
               <ul className="uk-accordion-content">
@@ -256,7 +255,7 @@ const EmbededChat = (props) => {
             onBlur={e => updateSessionIdQueryParam(e.target.value) && sessionId !== getSessionId() ? setIsLoadSession(true) : undefined} 
             className="uk-input uk-form-width-medium uk-form-small" type="text" value={sessionId}
           />
-          <a style={{marginLeft:"4px"}} className="uk-link-text" onClick={_ => {
+          <a style={{marginLeft:"4px"}} href="#/" className="uk-link-text" onClick={_ => {
             shareLink(sessionId, randomNickname()).then(_ => {
               setIsShareLinkToggle(true);
               setTimeout(_ => setIsShareLinkToggle(false), 1000);
@@ -269,7 +268,7 @@ const EmbededChat = (props) => {
             : <svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" data-svg="link"><path fill="none" stroke="#000" strokeWidth="1.1" d="M10.625,12.375 L7.525,15.475 C6.825,16.175 5.925,16.175 5.225,15.475 L4.525,14.775 C3.825,14.074 3.825,13.175 4.525,12.475 L7.625,9.375"></path><path fill="none" stroke="#000" strokeWidth="1.1" d="M9.325,7.375 L12.425,4.275 C13.125,3.575 14.025,3.575 14.724,4.275 L15.425,4.975 C16.125,5.675 16.125,6.575 15.425,7.275 L12.325,10.375"></path><path fill="none" stroke="#000" strokeWidth="1.1" d="M7.925,11.875 L11.925,7.975"></path></svg>
           }
          </a>
-         <a style={{marginLeft:"4px"}} className="uk-link-text" onClick={_ => {setSessionId('');updateSessionIdQueryParam('');setIsLoadSession(true);}}>
+         <a style={{marginLeft:"4px"}} href="#/" className="uk-link-text" onClick={_ => {setSessionId('');updateSessionIdQueryParam('');setIsLoadSession(true);}}>
           <svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" data-svg="refresh"><path fill="none" stroke="#000" strokeWidth="1.1" d="M17.08,11.15 C17.09,11.31 17.1,11.47 17.1,11.64 C17.1,15.53 13.94,18.69 10.05,18.69 C6.16,18.68 3,15.53 3,11.63 C3,7.74 6.16,4.58 10.05,4.58 C10.9,4.58 11.71,4.73 12.46,5"></path><polyline fill="none" stroke="#000" points="9.9 2 12.79 4.89 9.79 7.9"></polyline></svg>
          </a>
         </div>
