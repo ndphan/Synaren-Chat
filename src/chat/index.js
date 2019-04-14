@@ -1,14 +1,11 @@
 import React from 'react'
-import { Icon, Input, Avatar, Alert, Spin } from 'antd';
 import ifvisible from 'ifvisible.js';
 import styled from 'styled-components';
-import config from '../config/url.config.json';
+import config from '../Config/url.config.json';
 import queryString from 'query-string';
-import randomWords from '../random-words';
+import randomWords from '../Sevices/random-words';
 
 ifvisible.setIdleDuration(30);
-
-const Search = Input.Search;
 
 const Username = styled.div`
   && {
@@ -91,7 +88,7 @@ const ChatNickname = styled.div`
   flex-basis: 150%;
 `
 
-const ShareIcon = styled(Icon)`
+const ShareIcon = styled.a`
 	padding-left: 6px;
 	padding-right: 8px;
 `
@@ -384,12 +381,12 @@ class Chat extends React.Component {
 							{
 								isEditName ?
 									<React.Fragment>
-										<EditButton onClick={this.onClickEditNickname}><Icon type="edit" /></EditButton>
+										<EditButton onClick={this.onClickEditNickname}><a type="edit" /></EditButton>
 										<AppInput style={{ width: '100%' }} placeholder="Nickname" name="username" onChange={this.handleChange} />
 									</React.Fragment>
 									:
 									<React.Fragment>
-										<Avatar style={{ backgroundColor: '#87d068', marginLeft: 8, marginRight: 8 }} icon="user" />
+										<span style={{ backgroundColor: '#87d068', marginLeft: 8, marginRight: 8 }} icon="user" />
 										<ClickableLink onClick={this.onClickEditNickname}>{username}</ClickableLink>
 									</React.Fragment>
 							}
@@ -399,7 +396,7 @@ class Chat extends React.Component {
 						{
 							isEditSession ?
 								<React.Fragment>
-									<EditButton onClick={this.onClickEditSession}><Icon type="edit" /></EditButton>
+									<EditButton onClick={this.onClickEditSession}><a type="edit" /></EditButton>
 									<AppInput style={{ width: '100%' }} placeholder="Session Number" name="sessionId" onChange={this.handleChange} />
 								</React.Fragment>
 								:
@@ -413,7 +410,7 @@ class Chat extends React.Component {
 					</GroupSession>
 					{
 						errorMessage ? (
-							<Alert
+							<span
 								type="error"
 								style={{ marginTop: 10 }}
 								banner
@@ -434,8 +431,8 @@ class Chat extends React.Component {
 					))}
 				</ChatContainer>
 				<SendContainer>
-					<Search
-						addonBefore={isSending ? <Spin style={{marginTop: 6}}/> : undefined}
+					{/* <input
+						addonBefore={isSending ? <div style={{marginTop: 6}}/> : undefined}
 						style={{ boxShadow: '1px 2px', borderRadius: 4 }}
 						placeholder="Message"
 						enterButton="Send"
@@ -445,7 +442,7 @@ class Chat extends React.Component {
 						onChange={this.handleChange}
 						onPressEnter={this.sendMessage}
 						value={message}
-					/>
+					/> */}
 				</SendContainer>
 			</div>
 		)

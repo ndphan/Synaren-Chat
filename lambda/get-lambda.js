@@ -1,7 +1,6 @@
 const AWS = require('aws-sdk');
 AWS.config.update({region: 'ap-southeast-2'});
 const uuidv1 = require('uuid/v1');
-const lambda = new AWS.Lambda();
 const ddb = new AWS.DynamoDB({apiVersion: '2012-10-08'});
 
 function createInitialMessages(){
@@ -14,28 +13,6 @@ function mapDataToResponse(data){
         isActive: data.IsActive.N,
         messages: data.Messages.S
     }
-}
-
-async function findInactiveSession(){
-    const params = {
-      TableName: 'chat-session',
-      IndexName: 'IsActive-LastModifiedDate-index',
-      Limit: 1,
-      ProjectionExpression: "SessionId",
-      KeyConditionExpression: "IsActive = :v1",
-      ExpressionAttributeValues: {
-        ":v1": {N: '0'}
-      }
-    }
-    return new Promise(function (resolve, reject) {
-        ddb.query(params, function(err, data) {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(data);
-          }
-        });
-    })
 }
 
 async function createNewSession(){
@@ -63,38 +40,6 @@ async function createNewSession(){
           }
         });
     })
-}
-
-async function recycleOldSession(sessionId){
-    const params = {
-        TableName: 'chat-session',
-        Key:{
-            'SessionId' : {S: sessionId}
-        },
-        UpdateExpression: "set IsActive = :isActive, Messages = :initialMessages, LastModifiedDate = :lastModifiedDate",
-        ExpressionAttributeValues: {
-            ":isActive": {N: '1'},
-            ":initialMessages": {S: JSON.stringify(createInitialMessages())},
-            ":lastModifiedDate": {S: Date.now().toString()}
-        },
-        ReturnValues: "ALL_NEW"
-    };
-    return new Promise(function (resolve, reject) {
-        ddb.updateItem(params, function(err, data) {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(mapDataToResponse(data.Attributes));
-          }
-        });
-    })
-}
-
-function triggerCleanup(){
-  lambda.invoke({
-    FunctionName: 'cloud-chat-clean',
-    InvocationType: 'Event'
-  }, function(error, data) {});
 }
 
 async function fetchSession(sessionId){
@@ -129,13 +74,7 @@ exports.handler = async (event) => {
     try {
         let session;
         if(event.queryStringParameters['new-session']){
-            // const inactiveSession = await findInactiveSession(); 
-            // if(inactiveSession.Count === 0) {
-                // triggerCleanup(); // try to clean up to free up more sessions
-                session = await createNewSession();
-            // } else {
-                // session = await recycleOldSession(inactiveSession.Items[0].SessionId.S);
-            // }
+            session = await createNewSession();
         } else if(event.queryStringParameters['session']){
             const sessionId = event.queryStringParameters['session'];
             session = await fetchSession(sessionId);
