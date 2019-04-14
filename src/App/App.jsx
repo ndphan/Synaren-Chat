@@ -9,7 +9,7 @@ class App extends PureComponent {
 		return (
 			<RootApp className="primary-colour">
 				<SynarenBanner/>
-				<Route path="/" exact component={EmbededChat}/>
+				<Route path="**" exact component={EmbededChat}/>
 				<FooterVersion>© Nam Phan; v:{process.env.REACT_APP_API_VERSION_NUMBER}</FooterVersion>
 			</RootApp>
 		);

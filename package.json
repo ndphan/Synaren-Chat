@@ -2,7 +2,7 @@
   "name": "cloud-chat",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://www.synaren.com/cloud-chat/",
+  "homepage": "https://www.synaren.com/synaren-chat/",
   "dependencies": {
     "ifvisible.js": "^1.0.6",
     "moment": "^2.24.0",
