@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Comment from './Comment';
 import { ChatContainer, CommentListContainer } from './EmbededChat.styles';
-import { getSession, performSend, shareLink, buildChatLink } from './ChatService';
+import { getSession, performSend, shareLink } from './ChatService';
 import queryString from 'query-string';
 import randomWords from '../Sevices/random-words';
 import moment from 'moment';
@@ -239,7 +239,7 @@ const EmbededChat = (props) => {
     <ChatContainer>
       <form className="uk-form-stacked" uk-grid="true">
         <div>
-          <label className="uk-form-label" htmlFor="nickname-text">Nickname</label>
+          <label className="uk-form-label" style={{paddingTop:"5px"}} htmlFor="nickname-text">Nickname</label>
           <input 
             id="nickname-text" 
             onChange={e => setNickname(e.target.value)}
@@ -247,8 +247,8 @@ const EmbededChat = (props) => {
             className="uk-input uk-form-width-medium uk-form-small" type="text" value={nickname}
           />
         </div>
-        <div>
-          <label className="uk-form-label" htmlFor="session-id-text">Session Id</label>
+        <div className="uk-margin-remove">
+          <label className="uk-form-label" style={{paddingTop:"5px"}} htmlFor="session-id-text">Session Id</label>
           <input 
             id="session-id-text" 
             onChange={e => setSessionId(e.target.value)}
@@ -295,8 +295,8 @@ const EmbededChat = (props) => {
       </CommentListContainer>
       <hr/>
       <form onSubmit={e => {e.preventDefault(); sendMessage();}}>
-        <textarea value={newMessage} onChange={e => setNewMessage(e.target.value)} style={{resize:"none",height:"36px"}} className="uk-textarea uk-form-width-medium uk-width-3-4@s uk-width-2-4" type="text"></textarea>
-        <button style={{height:"36px"}} className="uk-button uk-button-primary uk-width-1-4@s uk-width-2-4">Submit {isLoading ? <div uk-spinner="ratio: 0.5" style={{position:"absolute",padding:"11px 0",paddingLeft: "20px"}}/> : undefined}</button>
+        <textarea value={newMessage} onFocus={e => e.target.focus()} onChange={e => setNewMessage(e.target.value)} style={{resize:"none",height:"36px"}} className="uk-textarea uk-form-width-medium uk-width-3-4@s uk-width-3-5" type="text"></textarea>
+        <button style={{height:"36px"}} className="uk-button uk-button-primary uk-width-1-4@s uk-width-2-5">Submit {isLoading ? <div uk-spinner="ratio: 0.5" style={{position:"absolute",padding:"11px 0",paddingLeft: "20px"}}/> : undefined}</button>
       </form>
     </ChatContainer>
   )

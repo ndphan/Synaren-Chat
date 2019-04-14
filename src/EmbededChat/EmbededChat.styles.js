@@ -3,14 +3,14 @@ import styled from 'styled-components';
 export const CommentContainer = styled.div`
 	&&& {
 		max-width: 80%;
-		min-width: 400px;
+		min-width: 300px;
 		padding: 2px 5px;
 		margin: 0;
 	}
 `;
 
 export const CommentListContainer = styled.div`
-	max-height: 60vh;
+	max-height: 0;
 	min-height: 400px;
 	overflow: auto;
 	padding: 0 20px;
