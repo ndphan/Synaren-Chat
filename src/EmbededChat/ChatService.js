@@ -63,3 +63,29 @@ export function stringToRGB(i) {
 
   return "#" + "00000".substring(0, 6 - c.length) + c;
 }
+
+const fallbackCopyTextToClipboard = (text) => {
+  var textArea = document.createElement("textarea");
+  textArea.value = text;
+  document.body.appendChild(textArea);
+  textArea.focus();
+  textArea.select();
+  try {
+    document.execCommand('copy');
+  } catch (err) { }
+  document.body.removeChild(textArea);
+}
+const copyTextToClipboard = (text) => {
+  if (!navigator.clipboard) {
+    return new Promise((resolve, reject) => {
+      fallbackCopyTextToClipboard(text);
+      resolve();
+    });
+  }
+  return navigator.clipboard.writeText(text);
+}
+
+
+export function shareLink(sessionId, nickname) {
+  return copyTextToClipboard(`www.synaren.com/cloud-chat/chat?session=${sessionId}&nickname=${nickname}`)
+}
