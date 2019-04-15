@@ -4,18 +4,21 @@
   "private": true,
   "homepage": "https://www.synaren.com/synaren-chat/",
   "dependencies": {
+    "device-uuid": "^1.0.4",
     "ifvisible.js": "^1.0.6",
     "moment": "^2.24.0",
     "query-string": "^6.4.2",
     "quill": "^1.3.6",
     "random-words": "^1.1.0",
     "react": "^16.8.6",
+    "react-avatar": "^3.6.0",
     "react-dom": "^16.8.6",
     "react-router": "^5.0.0",
     "react-router-dom": "^5.0.0",
     "react-scripts": "2.1.8",
     "styled-components": "^4.2.0",
-    "uikit": "^3.0.3"
+    "uikit": "^3.0.3",
+    "uuid": "^3.3.2"
   },
   "scripts": {
     "start": "node 'find-replace-version-id.js' && react-scripts start",

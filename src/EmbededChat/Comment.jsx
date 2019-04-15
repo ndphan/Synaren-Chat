@@ -2,7 +2,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { CommentContainer } from './EmbededChat.styles';
 import moment from 'moment';
-import { stringToRGB } from './ChatService';
+import { stringToRGB } from '../Sevices/common';
+
 
 const Comment = (props) => {
 	const message = props.message;

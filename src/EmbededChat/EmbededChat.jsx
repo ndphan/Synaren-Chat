@@ -1,15 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Comment from './Comment';
 import { ChatContainer, CommentListContainer } from './EmbededChat.styles';
-import { getSession, performSend, shareLink } from './ChatService';
+import { getSession, performSend, shareLink, getUsersSession, getCorrelationId } from './ChatService';
 import queryString from 'query-string';
 import randomWords from '../Sevices/random-words';
 import moment from 'moment';
 import UIkit from 'uikit';
 import ifvisible from 'ifvisible.js';
+import Avatar from 'react-avatar';
+import { stringToRGB } from '../Sevices/common';
 
 ifvisible.setIdleDuration(30);
-
 
 let singleLongPoll;
 
@@ -116,6 +117,7 @@ const EmbededChat = (props) => {
   const [newMessage, setNewMessage] = useState(undefined);
   const [isLoading, setIsLoading] = useState(false);
   const [isShareLinkToggle, setIsShareLinkToggle] = useState(false);
+  const [usersInSession, setUsersInSession] = useState([]);
 
   const prevLocation = usePrevious(props.location);
   useEffect(() => {
@@ -189,7 +191,7 @@ const EmbededChat = (props) => {
       } else {
         console.log("skipping poll when idle")
       }
-    }, 3000);
+    }, 5000);
   };
 
   useEffect(() => {
@@ -197,8 +199,9 @@ const EmbededChat = (props) => {
       setIsLoadSession(false);
       const sessionId = getSessionId();
       setIsLoading(true);
-      getSession(sessionId)
+      getSession(sessionId, nickname)
         .then(data => {
+          getUsersSession(data.sessionId).then(setUsersInSession).catch(_ => setUsersInSession([]));
           const newMessages = JSON.parse(data.messages).messages || [];
           updateSessionIdQueryParam(data.sessionId);
           setSessionId(data.sessionId);
@@ -211,7 +214,7 @@ const EmbededChat = (props) => {
           longPoll();
           setIsLoading(false);
         })
-        .catch(onError)
+        .catch(onError);
     }
   });
 
@@ -273,7 +276,12 @@ const EmbededChat = (props) => {
          </a>
         </div>
       </form>
-      <hr style={{margin:0, marginTop:"20px"}}></hr>
+      <div style={{width:"100%", maxHeight:"24px"}}>
+        <Avatar className="uk-animation-slide-top-small" color={stringToRGB(getCorrelationId())} key={-1} style={{paddingLeft:'5px',marginLeft:'-5px'}} name={nickname} round={true} size={20}/>
+          {usersInSession && usersInSession.length > 0 ? usersInSession.filter(user => user.correlationId !== getCorrelationId()).map((user, index) => <Avatar className="uk-animation-slide-top-small" color={stringToRGB(user.username)} key={index} style={{marginLeft:'-5px'}} name={user.username} round={true} size={20}/>)
+          : <div style={{height:"24px"}}></div>}
+      </div>
+      <hr style={{margin:0, marginTop:"3px"}}/>
       {
         (messages && messages.length === 0) ? 
         <div uk-alert="true" style={{position:"absolute"}}>
