@@ -1,9 +1,12 @@
 const dynamodbLayer = require("/opt/dynamodb-layer.js");
 
 function mapUsersSessionData(data) {
+  const currentDate3Mins = Date.now() - 3 * 60 * 1000;
   return {
     sessionId: data.SessionId.S,
-    users: data.SessionUsers ? JSON.parse(data.SessionUsers.S) : [],
+    users: data.SessionUsers
+      ? JSON.parse(data.SessionUsers.S).filter(user => user.lastActiveDate - currentDate3Mins > 0)
+      : [],
     lastModifiedDate: data.LastModifiedDate.S
   };
 }
@@ -30,12 +33,12 @@ exports.handler = async event => {
       .then(mapUsersSessionData)
       .catch(error => {
         if (error.message === dynamodbLayer.NO_USER_SESSION_FOUND_CODE) {
-          return { message: "no user session was found" };
+          return { status: 404, message: "no user session was found" };
         } else {
           throw error;
         }
       });
-    return buildResponse(200, JSON.stringify(session));
+    return buildResponse(session.status || 200, JSON.stringify(session));
   } catch (e) {
     return buildResponse(
       500,
