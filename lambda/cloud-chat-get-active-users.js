@@ -29,7 +29,7 @@ exports.handler = async event => {
       .getUsersSession(sessionId)
       .then(mapUsersSessionData)
       .catch(error => {
-        if (error === dynamodbLayer.NO_USER_SESSION_FOUND_CODE) {
+        if (error.message === dynamodbLayer.NO_USER_SESSION_FOUND_CODE) {
           return { message: "no user session was found" };
         } else {
           throw error;
@@ -38,7 +38,7 @@ exports.handler = async event => {
     return buildResponse(200, JSON.stringify(session));
   } catch (e) {
     return buildResponse(
-      400,
+      500,
       JSON.stringify({ message: "internal server error" })
     );
   }
