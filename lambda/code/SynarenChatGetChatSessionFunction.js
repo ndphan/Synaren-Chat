@@ -1,6 +1,6 @@
 const dynamodbLayer = require("/opt/dynamodb-layer.js");
 const lambdaLayer = require("/opt/lambda-layer.js");
-const uuidv1 = require("uuid/v1");
+const randomWord = require("/opt/random-words.js");
 
 function mapChatData(data) {
   return {
@@ -18,10 +18,10 @@ function buildResponse(code, message) {
   };
 }
 
-function logUser(event, session){
+function logUser(event, session) {
   const correlationId = event.queryStringParameters["correlationId"];
-  const username = event.queryStringParameters["username"]
-  if(correlationId && username) {
+  const username = event.queryStringParameters["username"];
+  if (correlationId && username) {
     lambdaLayer.invokeAddActiveUserEvent({
       sessionId: session.sessionId,
       correlationId: correlationId,
@@ -40,12 +40,21 @@ exports.handler = async event => {
   try {
     let session;
     if (event.queryStringParameters["new-session"]) {
-      session = await dynamodbLayer.createSession(uuidv1()).then(mapChatData);
+      session = await dynamodbLayer
+        .createSession(
+          randomWord({
+            min: 3,
+            max: 4,
+            join: "",
+            formatter: word => word.charAt(0).toUpperCase() + word.slice(1)
+          })
+        )
+        .then(mapChatData);
     } else if (event.queryStringParameters["session"]) {
       const sessionId = event.queryStringParameters["session"];
       session = await dynamodbLayer.getChatSession(sessionId).then(mapChatData);
     }
-    logUser(event, session)
+    logUser(event, session);
     return buildResponse(200, JSON.stringify(session));
   } catch (e) {
     return buildResponse(

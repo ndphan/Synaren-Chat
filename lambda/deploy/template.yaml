@@ -1,44 +1,11 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: Synaren Chat serverless chat
 Resources: 
+# -- Gateway
   SynarenChatApi:
     Type: AWS::ApiGateway::RestApi
     Properties:
         Name: 'SynarenChat'
-  SynarenChatLayer:
-    Type: AWS::Lambda::LayerVersion
-    Properties:
-      LayerName: 'SynarenChatLayer'
-      Description: 'Synaren Chat layer'
-      Content: '../layers'
-      CompatibleRuntimes:
-        - nodejs6.10
-        - nodejs8.10
-  SynarenChatGetChatSessionPermission:
-    Type: AWS::Lambda::Permission
-    DependsOn: SynarenChatGetChatSessionFunction
-    Properties:
-      Action: lambda:invokeFunction
-      FunctionName: !GetAtt SynarenChatGetChatSessionFunction.Arn
-      Principal: "apigateway.amazonaws.com"
-      SourceArn:  !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${SynarenChatApi}/*
-  SynarenChatGetChatSessionFunction:
-    Type: AWS::Lambda::Function
-    DependsOn: SynarenChatLayer
-    Properties:
-      Code: '../cloud-chat-get-session.js'
-      Description: 'Get chat session by session id or create a new one'
-      Runtime: nodejs8.10
-      Timeout: 180
-      MemorySize: 128
-      FunctionName: 'SynarenChatGetChatSession'
-      Handler: cloud-chat-get-session.handler
-      Role: arn:aws:iam::960300581623:role/service-role/cloud-chat
-      Tags:
-        - Key: application
-          Value: SynarenChat
-      Layers:
-        - !Ref SynarenChatLayer
   SynarenChatResource1:
     DependsOn: SynarenChatApi
     Type: AWS::ApiGateway::Resource
@@ -51,45 +18,23 @@ Resources:
     Type: AWS::ApiGateway::Resource
     Properties:
       ParentId: !Ref SynarenChatResource1
-      PathPart: 'chat'
+      PathPart: 'api'
       RestApiId: !Ref SynarenChatApi
   SynarenChatResource3:
     DependsOn: SynarenChatResource2
     Type: AWS::ApiGateway::Resource
     Properties:
       ParentId: !Ref SynarenChatResource2
-      PathPart: 'api'
+      PathPart: 'chat'
       RestApiId: !Ref SynarenChatApi
-  SynarenChatGetChatSessionMethod:
-    DependsOn: [SynarenChatResource3, SynarenChatGetChatSessionFunction, SynarenChatGetChatSessionPermission]
-    Type: AWS::ApiGateway::Method
+  SynarenChatResource31:
+    DependsOn: SynarenChatResource2
+    Type: AWS::ApiGateway::Resource
     Properties:
-      ApiKeyRequired: true
-      AuthorizationType: None
-      HttpMethod: GET
-      Integration:
-        IntegrationHttpMethod: POST
-        Type: AWS_PROXY
-        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${SynarenChatGetChatSessionFunction.Arn}/invocations
-        IntegrationResponses: 
-          - StatusCode: 200
-            ResponseTemplates: 
-              application/json: "$input.json('$.body')"
-      MethodResponses:
-        - StatusCode: 200
-          ResponseParameters: 
-            method.response.header.Content-Length: true
-            method.response.header.Content-Type: true
-            method.response.header.Connection: true
-      OperationName: GetChatSessions
-      ResourceId: !Ref SynarenChatResource3
+      ParentId: !Ref SynarenChatResource2
+      PathPart: 'user'
       RestApiId: !Ref SynarenChatApi
-  SynarenChatDeployment:
-    DependsOn: SynarenChatGetChatSessionMethod
-    Type: AWS::ApiGateway::Deployment
-    Properties:
-      RestApiId: !Ref SynarenChatApi
-      StageName: v1
+# -- Api Key
   SynarenChatApiKey: 
     Type: AWS::ApiGateway::ApiKey
     Properties: 
@@ -117,7 +62,220 @@ Resources:
       KeyId: !Ref SynarenChatApiKey
       KeyType: API_KEY
       UsagePlanId: !Ref SynarenChatApiUsagePlan
-Outputs:
-  SynarenChatOutput:
-    Value: !Ref SynarenChatApiUsagePlanKey
-    Value: !Ref SynarenChatGetChatSessionFunction
+# -- Api Key
+# -- Layers
+  SynarenChatLayer:
+    Type: AWS::Lambda::LayerVersion
+    Properties:
+      LayerName: 'SynarenChatLayer'
+      Description: 'Synaren Chat layer'
+      Content: '../layers'
+      CompatibleRuntimes:
+        - nodejs6.10
+        - nodejs8.10
+# -- Layers
+# -- SynarenChatGetChatSessionFunction
+  SynarenChatGetChatSessionPermission:
+    Type: AWS::Lambda::Permission
+    DependsOn: SynarenChatGetChatSessionFunction
+    Properties:
+      Action: lambda:invokeFunction
+      FunctionName: !GetAtt SynarenChatGetChatSessionFunction.Arn
+      Principal: "apigateway.amazonaws.com"
+      SourceArn:  !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${SynarenChatApi}/*
+  SynarenChatGetChatSessionFunction:
+    Type: AWS::Lambda::Function
+    DependsOn: SynarenChatLayer
+    Properties:
+      Code: '../code/SynarenChatGetChatSessionFunction.js'
+      Description: 'Get chat session by session id or create a new one'
+      Runtime: nodejs8.10
+      Timeout: 180
+      MemorySize: 128
+      FunctionName: 'SynarenChatGetChatSession'
+      Handler: SynarenChatGetChatSessionFunction.handler
+      Role: arn:aws:iam::960300581623:role/service-role/cloud-chat
+      Tags:
+        - Key: application
+          Value: SynarenChat
+      Layers:
+        - !Ref SynarenChatLayer
+  SynarenChatGetChatSessionMethod:
+    DependsOn: [SynarenChatResource3, SynarenChatGetChatSessionFunction, SynarenChatGetChatSessionPermission]
+    Type: AWS::ApiGateway::Method
+    Properties:
+      ApiKeyRequired: true
+      AuthorizationType: None
+      HttpMethod: GET
+      Integration:
+        IntegrationHttpMethod: POST
+        Type: AWS_PROXY
+        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${SynarenChatGetChatSessionFunction.Arn}/invocations
+      MethodResponses:
+        - StatusCode: 200
+          ResponseParameters: 
+            method.response.header.Content-Length: true
+            method.response.header.Content-Type: true
+            method.response.header.Connection: true
+      OperationName: SynarenChatGetChatSessionMethod
+      ResourceId: !Ref SynarenChatResource3
+      RestApiId: !Ref SynarenChatApi
+# -- SynarenChatGetChatSessionFunction
+# -- SynarenChatPostMessageFunction
+  SynarenChatPostMessagePermission:
+    Type: AWS::Lambda::Permission
+    DependsOn: SynarenChatPostMessageFunction
+    Properties:
+      Action: lambda:invokeFunction
+      FunctionName: !GetAtt SynarenChatPostMessageFunction.Arn
+      Principal: "apigateway.amazonaws.com"
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${SynarenChatApi}/*
+  SynarenChatPostMessageFunction:
+    Type: AWS::Lambda::Function
+    DependsOn: SynarenChatLayer
+    Properties:
+      Code: '../code/SynarenChatPostMessageFunction.js'
+      Description: 'Post a message to a chat session'
+      Runtime: nodejs8.10
+      Timeout: 180
+      MemorySize: 128
+      FunctionName: 'SynarenChatPostMessage'
+      Handler: SynarenChatPostMessageFunction.handler
+      Role: arn:aws:iam::960300581623:role/service-role/cloud-chat
+      Tags:
+        - Key: application
+          Value: SynarenChat
+      Layers:
+        - !Ref SynarenChatLayer
+  SynarenChatPostMessageMethod:
+    DependsOn: [SynarenChatResource3, SynarenChatPostMessageFunction, SynarenChatPostMessagePermission]
+    Type: AWS::ApiGateway::Method
+    Properties:
+      ApiKeyRequired: true
+      AuthorizationType: None
+      HttpMethod: POST
+      Integration:
+        IntegrationHttpMethod: POST
+        Type: AWS_PROXY
+        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${SynarenChatPostMessageFunction.Arn}/invocations
+      MethodResponses:
+        - StatusCode: 200
+          ResponseParameters: 
+            method.response.header.Content-Length: true
+            method.response.header.Content-Type: true
+            method.response.header.Connection: true
+      OperationName: SynarenChatPostMessageMethod
+      ResourceId: !Ref SynarenChatResource3
+      RestApiId: !Ref SynarenChatApi
+# -- SynarenChatPostMessageFunction
+# -- SynarenChatGetUsersSessionFunction
+  SynarenChatGetUsersSessionPermission:
+    Type: AWS::Lambda::Permission
+    DependsOn: SynarenChatGetUsersSessionFunction
+    Properties:
+      Action: lambda:invokeFunction
+      FunctionName: !GetAtt SynarenChatGetUsersSessionFunction.Arn
+      Principal: "apigateway.amazonaws.com"
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${SynarenChatApi}/*
+  SynarenChatGetUsersSessionFunction:
+    Type: AWS::Lambda::Function
+    DependsOn: SynarenChatLayer
+    Properties:
+      Code: '../code/SynarenChatGetUsersSessionFunction.js'
+      Description: 'Get all users in session'
+      Runtime: nodejs8.10
+      Timeout: 180
+      MemorySize: 128
+      FunctionName: 'SynarenChatGetUsersSession'
+      Handler: SynarenChatGetUsersSessionFunction.handler
+      Role: arn:aws:iam::960300581623:role/service-role/cloud-chat
+      Tags:
+        - Key: application
+          Value: SynarenChat
+      Layers:
+        - !Ref SynarenChatLayer
+  SynarenChatGetUsersSessionMethod:
+    DependsOn: [SynarenChatResource31, SynarenChatGetUsersSessionFunction, SynarenChatGetUsersSessionPermission]
+    Type: AWS::ApiGateway::Method
+    Properties:
+      ApiKeyRequired: true
+      AuthorizationType: None
+      HttpMethod: GET
+      Integration:
+        IntegrationHttpMethod: POST
+        Type: AWS_PROXY
+        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${SynarenChatGetUsersSessionFunction.Arn}/invocations
+      MethodResponses:
+        - StatusCode: 200
+          ResponseParameters: 
+            method.response.header.Content-Length: true
+            method.response.header.Content-Type: true
+            method.response.header.Connection: true
+      OperationName: SynarenChatGetUsersSessionMethod
+      ResourceId: !Ref SynarenChatResource31
+      RestApiId: !Ref SynarenChatApi
+# -- SynarenChatGetUsersSessionFunction
+# -- SynarenChatAddActiveUserFunction
+# Activated by Lambda
+  SynarenChatAddActiveUserFunction:
+    Type: AWS::Lambda::Function
+    DependsOn: SynarenChatLayer
+    Properties:
+      Code: '../code/SynarenChatAddActiveUserFunction.js'
+      Description: 'Add a user to a session'
+      Runtime: nodejs8.10
+      Timeout: 180
+      MemorySize: 128
+      FunctionName: 'SynarenChatAddActiveUser'
+      Handler: SynarenChatAddActiveUserFunction.handler
+      Role: arn:aws:iam::960300581623:role/service-role/cloud-chat
+      Tags:
+        - Key: application
+          Value: SynarenChat
+      Layers:
+        - !Ref SynarenChatLayer
+# -- SynarenChatAddActiveUserFunction
+# -- SynarenChatCleanSessionsFunction
+# Activated by CloudWatch Event
+  SynarenChatCleanSessionsFunction:
+    Type: AWS::Lambda::Function
+    DependsOn: SynarenChatLayer
+    Properties:
+      Code: '../code/SynarenChatCleanSessionsFunction.js'
+      Description: 'Add a user to a session'
+      Runtime: nodejs8.10
+      Timeout: 180
+      MemorySize: 128
+      FunctionName: 'SynarenChatCleanSessions'
+      Handler: SynarenChatCleanSessionsFunction.handler
+      Role: arn:aws:iam::960300581623:role/service-role/cloud-chat
+      Tags:
+        - Key: application
+          Value: SynarenChat
+      Layers:
+        - !Ref SynarenChatLayer
+  SynarenChatCleanSessionsSchedule:
+    Type: AWS::Events::Rule
+    DependsOn: SynarenChatCleanSessionsFunction
+    Properties:
+      ScheduleExpression: "rate(12 hours)"
+      Targets:
+      - Id: SynarenChatCleanSessionsSchedule
+        Arn: !GetAtt SynarenChatCleanSessionsFunction.Arn
+  SynarenChatCleanSessionsPermission:
+    Type: AWS::Lambda::Permission
+    DependsOn: [SynarenChatCleanSessionsFunction, SynarenChatCleanSessionsSchedule]
+    Properties:
+      Action: lambda:invokeFunction
+      FunctionName: !GetAtt SynarenChatCleanSessionsFunction.Arn
+      Principal: "events.amazonaws.com"
+      SourceArn: !GetAtt SynarenChatCleanSessionsSchedule.Arn
+# -- SynarenChatCleanSessionsFunction
+# -- Deploy
+  SynarenChatDeployment:
+    DependsOn: [SynarenChatGetChatSessionMethod, SynarenChatPostMessageMethod, SynarenChatGetUsersSessionMethod]
+    Type: AWS::ApiGateway::Deployment
+    Properties:
+      RestApiId: !Ref SynarenChatApi
+      StageName: v1
+# -- Deploy
