@@ -2,6 +2,9 @@ import config from "../Config/url.config.json";
 import { send, copyTextToClipboard } from "../Sevices/common";
 import { DeviceUUID } from "device-uuid";
 import moment from "moment";
+const API_KEY = {
+  "x-api-key": config.ACCESS_TOKEN
+};
 
 function generateDeviceIDDay() {
   const du = new DeviceUUID().parse();
@@ -38,9 +41,11 @@ export function getCorrelationId() {
 }
 
 export async function getUsersSession(sessionId) {
-  return send(`${config.CHAT_BASE_URL}/users?session=${sessionId}`, "GET").then(
-    data => data.users
-  );
+  return send(
+    `${config.CHAT_BASE_URL}/user?session=${sessionId}`,
+    "GET",
+    API_KEY
+  ).then(data => data.users);
 }
 
 export async function getSession(sessionId, username) {
@@ -48,23 +53,25 @@ export async function getSession(sessionId, username) {
     ? send(
         `${
           config.CHAT_BASE_URL
-        }?session=${sessionId}&correlationId=${correlationId}${
+        }/chat?session=${sessionId}&correlationId=${correlationId}${
           username ? `&username=${username}` : ""
         }`,
-        "GET"
+        "GET",
+        API_KEY
       )
     : send(
         `${
           config.CHAT_BASE_URL
-        }?new-session=true&correlationId=${correlationId}${
+        }/chat?new-session=true&correlationId=${correlationId}${
           username ? `&username=${username}` : ""
         }`,
-        "GET"
+        "GET",
+        API_KEY
       );
 }
 
 export async function performSend(newMessage) {
-  return send(config.CHAT_BASE_URL, "POST", undefined, newMessage).then(
+  return send(`${config.CHAT_BASE_URL}/chat`, "POST", API_KEY, newMessage).then(
     data => JSON.parse(data.messages).messages
   );
 }

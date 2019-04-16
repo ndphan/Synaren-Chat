@@ -69,33 +69,35 @@ const EmbededChat = (props) => {
 		let nickname = queryString.parse(props.location.search || "{}").nickname;
 		return nickname ? nickname : '';
   }
+  
+  const updateHistoryRoute = (parameter, isReplace) => {
+    const { history } = props;
+    const newParams = `?${Object.keys(parameter).map((query, index) => `${index ? '&' : ''}${query}=${parameter[query]}`).join('')}`;
+    if(isReplace){
+      history.replace({
+        search: newParams
+      });
+    } else {
+      history.push({
+        search: newParams
+      });
+    }
+  }
 
   const updateNicknameQueryParam = nickname => {
     const parsed = queryString.parse(props.location.search);
-    parsed.nickname = nickname;
-    const { history } = props;
-		history.push({
-			search: `?${Object.keys(parsed).map((query, index) => `${index ? '&' : ''}${query}=${parsed[query]}`).join('')}`
-    });
+    if(nickname !== parsed.nickname){
+      parsed.nickname = nickname;
+      updateHistoryRoute(parsed, !!!nickname);
+    }
     return nickname;
   }
-  
+
   const updateSessionIdQueryParam = sessionId => {
     const parsed = queryString.parse(props.location.search);
     if(sessionId !== parsed.session){
-      const isEmptySession = !!!parsed.session;
       parsed.session = sessionId;
-      const { history } = props;
-      const newParams = `?${Object.keys(parsed).map((query, index) => `${index ? '&' : ''}${query}=${parsed[query]}`).join('')}`;
-      if(isEmptySession){
-        history.replace({
-          search: newParams
-        });
-      } else {
-        history.push({
-          search: newParams
-        });
-      }
+      updateHistoryRoute(parsed, !!!parsed.session);
     }
     return sessionId;
   }

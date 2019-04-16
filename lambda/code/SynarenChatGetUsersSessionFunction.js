@@ -33,7 +33,7 @@ exports.handler = async event => {
       .then(mapUsersSessionData)
       .catch(error => {
         if (error.message === dynamodbLayer.NO_USER_SESSION_FOUND_CODE) {
-          return { status: 404, message: "no user session was found" };
+          return { status: 200, message: "no user session was found" };
         } else {
           throw error;
         }

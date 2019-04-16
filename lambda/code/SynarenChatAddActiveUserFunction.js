@@ -82,7 +82,7 @@ exports.handler = async event => {
         .then(mapUsersSessionData);
       if (!sessionUsers.sessionId) {
         return buildResponse(
-          404,
+          200,
           JSON.stringify(NO_SESSION_FOUND_ERROR_MSG)
         );
       }
@@ -97,7 +97,7 @@ exports.handler = async event => {
       return buildResponse(200, JSON.stringify(persistedSessionUsers));
     } else {
       return buildResponse(
-        404,
+        200,
         JSON.stringify(NO_SESSION_FOUND_ERROR_MSG)
       );
     }
