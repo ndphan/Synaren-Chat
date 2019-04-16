@@ -1,0 +1,123 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Synaren Chat serverless chat
+Resources: 
+  SynarenChatApi:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+        Name: 'SynarenChat'
+  SynarenChatLayer:
+    Type: AWS::Lambda::LayerVersion
+    Properties:
+      LayerName: 'SynarenChatLayer'
+      Description: 'Synaren Chat layer'
+      Content: '../layers'
+      CompatibleRuntimes:
+        - nodejs6.10
+        - nodejs8.10
+  SynarenChatGetChatSessionPermission:
+    Type: AWS::Lambda::Permission
+    DependsOn: SynarenChatGetChatSessionFunction
+    Properties:
+      Action: lambda:invokeFunction
+      FunctionName: !GetAtt SynarenChatGetChatSessionFunction.Arn
+      Principal: "apigateway.amazonaws.com"
+      SourceArn:  !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${SynarenChatApi}/*
+  SynarenChatGetChatSessionFunction:
+    Type: AWS::Lambda::Function
+    DependsOn: SynarenChatLayer
+    Properties:
+      Code: '../cloud-chat-get-session.js'
+      Description: 'Get chat session by session id or create a new one'
+      Runtime: nodejs8.10
+      Timeout: 180
+      MemorySize: 128
+      FunctionName: 'SynarenChatGetChatSession'
+      Handler: cloud-chat-get-session.handler
+      Role: arn:aws:iam::960300581623:role/service-role/cloud-chat
+      Tags:
+        - Key: application
+          Value: SynarenChat
+      Layers:
+        - !Ref SynarenChatLayer
+  SynarenChatResource1:
+    DependsOn: SynarenChatApi
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      ParentId: !GetAtt SynarenChatApi.RootResourceId
+      PathPart: 'synaren'
+      RestApiId: !Ref SynarenChatApi
+  SynarenChatResource2:
+    DependsOn: SynarenChatResource1
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      ParentId: !Ref SynarenChatResource1
+      PathPart: 'chat'
+      RestApiId: !Ref SynarenChatApi
+  SynarenChatResource3:
+    DependsOn: SynarenChatResource2
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      ParentId: !Ref SynarenChatResource2
+      PathPart: 'api'
+      RestApiId: !Ref SynarenChatApi
+  SynarenChatGetChatSessionMethod:
+    DependsOn: [SynarenChatResource3, SynarenChatGetChatSessionFunction, SynarenChatGetChatSessionPermission]
+    Type: AWS::ApiGateway::Method
+    Properties:
+      ApiKeyRequired: true
+      AuthorizationType: None
+      HttpMethod: GET
+      Integration:
+        IntegrationHttpMethod: POST
+        Type: AWS_PROXY
+        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${SynarenChatGetChatSessionFunction.Arn}/invocations
+        IntegrationResponses: 
+          - StatusCode: 200
+            ResponseTemplates: 
+              application/json: "$input.json('$.body')"
+      MethodResponses:
+        - StatusCode: 200
+          ResponseParameters: 
+            method.response.header.Content-Length: true
+            method.response.header.Content-Type: true
+            method.response.header.Connection: true
+      OperationName: GetChatSessions
+      ResourceId: !Ref SynarenChatResource3
+      RestApiId: !Ref SynarenChatApi
+  SynarenChatDeployment:
+    DependsOn: SynarenChatGetChatSessionMethod
+    Type: AWS::ApiGateway::Deployment
+    Properties:
+      RestApiId: !Ref SynarenChatApi
+      StageName: v1
+  SynarenChatApiKey: 
+    Type: AWS::ApiGateway::ApiKey
+    Properties: 
+      Name: SynarenChatApiKey
+      Enabled: true
+      GenerateDistinctId: false
+  SynarenChatApiUsagePlan:
+    DependsOn: SynarenChatDeployment
+    Type: "AWS::ApiGateway::UsagePlan"
+    Properties:
+      ApiStages: 
+      - ApiId: !Ref SynarenChatApi
+        Stage: v1
+      Quota:
+        Limit: 400000
+        Period: MONTH
+      Throttle:
+        BurstLimit: 1000
+        RateLimit: 1000
+      UsagePlanName: SynarenChatApiUsagePlan
+  SynarenChatApiUsagePlanKey:
+    DependsOn: SynarenChatApiKey
+    Type: "AWS::ApiGateway::UsagePlanKey"
+    Properties:
+      KeyId: !Ref SynarenChatApiKey
+      KeyType: API_KEY
+      UsagePlanId: !Ref SynarenChatApiUsagePlan
+Outputs:
+  SynarenChatOutput:
+    Value: !Ref SynarenChatApiUsagePlanKey
+    Value: !Ref SynarenChatGetChatSessionFunction
