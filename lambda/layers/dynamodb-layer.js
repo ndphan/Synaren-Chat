@@ -152,12 +152,23 @@ module.exports.deleteBatchChatSession = async function(sessionIds) {
       }
     }
   }));
-  const params = {
-    RequestItems: {
-      [chatSessionTableName]: deleteRequest
+  const deleteRequests = [];
+  const increments = 24;
+  for (let count = 0; count < deleteRequest.length; count += increments) {
+    let requests;
+    if(count + increments < deleteRequest.length){
+      requests = deleteRequest.slice(count, count + increments)
+    } else {
+      requests = deleteRequest.slice(count, deleteRequest.length)
     }
-  };
-  return ddb.batchWriteItem(params).promise();
+    const params = {
+      RequestItems: {
+        [chatSessionTableName]: requests
+      }
+    };
+    deleteRequests.push(ddb.batchWriteItem(params).promise());
+  }
+  return Promise.all(deleteRequests);
 };
 
 module.exports.deleteBatchUsersSession = async function(sessionIds) {
@@ -173,12 +184,23 @@ module.exports.deleteBatchUsersSession = async function(sessionIds) {
       }
     }
   }));
-  const params = {
-    RequestItems: {
-      [chatSessionUsersTableName]: deleteRequest
+  const deleteRequests = [];
+  const increments = 24;
+  for (let count = 0; count < deleteRequest.length; count += increments) {
+    let requests;
+    if(count + increments < deleteRequest.length){
+      requests = deleteRequest.slice(count, count + increments)
+    } else {
+      requests = deleteRequest.slice(count, deleteRequest.length)
     }
-  };
-  return ddb.batchWriteItem(params).promise();
+    const params = {
+      RequestItems: {
+        [chatSessionUsersTableName]: requests
+      }
+    };
+    deleteRequests.push(ddb.batchWriteItem(params).promise());
+  }
+  return Promise.all(deleteRequests);
 };
 
 module.exports.createSession = async function(newSessionId) {
