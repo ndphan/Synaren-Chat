@@ -57,6 +57,7 @@ exports.handler = async event => {
     logUser(event, session);
     return buildResponse(200, JSON.stringify(session));
   } catch (e) {
+    console.error(e);
     return buildResponse(
       500,
       JSON.stringify({ message: "internal server error" })
