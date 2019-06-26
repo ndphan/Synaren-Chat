@@ -313,8 +313,6 @@ const EmbededChat = (props) => {
 }
 
 EmbededChat.propTypes = {};
-
 EmbededChat.defaultProps = {};
 
 export default EmbededChat;
-

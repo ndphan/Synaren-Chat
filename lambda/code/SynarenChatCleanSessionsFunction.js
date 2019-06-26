@@ -10,7 +10,7 @@ exports.handler = async _ => {
     expiredUser.Items.map(session => session.SessionId.S)
   );
   await Promise.all([
-    // make sure if they are reject then resolve them
+    // make sure if they are rejected then resolve them
     deleteBatchChatSession
       .catch(err => console.error(err))
       .then(e => Promise.resolve(e)),
