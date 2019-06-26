@@ -1,11 +1,20 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: Synaren Chat serverless chat
+Parameters:
+  DynamodbTableBaseName:
+    Type: String
+    Default: 'chat-session'
+    # TODO: remove hardcoding of table names
+    Description: Table name used by SynarenChat (this defines the IAM Role) - must be chat-session-users, chat-session as this is currently hardcoded
+  FunctionBaseName:
+    Type: String
+    Description: Base name of the function e.g SynarenChat
 Resources: 
 # -- Gateway
   SynarenChatApi:
     Type: AWS::ApiGateway::RestApi
     Properties:
-        Name: 'SynarenChat'
+        Name: !Ref FunctionBaseName
         EndpointConfiguration:
           Types: 
           - "REGIONAL"
@@ -41,7 +50,7 @@ Resources:
   SynarenChatApiKey: 
     Type: AWS::ApiGateway::ApiKey
     Properties: 
-      Name: SynarenChatApiKey
+      Name: !Sub ${FunctionBaseName}ApiKey
       Enabled: true
       GenerateDistinctId: false
   SynarenChatApiUsagePlan:
@@ -57,7 +66,7 @@ Resources:
       Throttle:
         BurstLimit: 1000
         RateLimit: 1000
-      UsagePlanName: SynarenChatApiUsagePlan
+      UsagePlanName: !Sub ${FunctionBaseName}ApiUsagePlan
   SynarenChatApiUsagePlanKey:
     DependsOn: SynarenChatApiKey
     Type: "AWS::ApiGateway::UsagePlanKey"
@@ -143,6 +152,49 @@ Resources:
         - nodejs6.10
         - nodejs8.10
 # -- Layers
+# -- IAM Service Role
+  SynarenChatServiceRole:
+    Type: AWS::IAM::Role
+    Properties: 
+      AssumeRolePolicyDocument: 
+        Version: "2012-10-17"
+        Statement: 
+          - 
+            Effect: "Allow"
+            Principal: 
+              Service: 
+                - "lambda.amazonaws.com"
+            Action: 
+              - "sts:AssumeRole"
+      Path: '/'
+      Policies: 
+        -
+          PolicyName: !Sub "${FunctionBaseName}DynamoDbExecution"
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+            - Sid: !Sub "${FunctionBaseName}DynamoDbExecution"
+              Effect: Allow
+              Action:
+              - dynamodb:PutItem
+              - dynamodb:GetItem
+              - dynamodb:Scan
+              - dynamodb:Query
+              - dynamodb:UpdateItem
+              - dynamodb:DeleteItem
+              - dynamodb:BatchWriteItem
+              Resource: !Sub arn:aws:dynamodb:*:${AWS::AccountId}:table/${DynamodbTableBaseName}*
+        -
+          PolicyName: !Sub "${FunctionBaseName}LambdaExecution"
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+            - Sid: !Sub "${FunctionBaseName}LambdaExecution"
+              Effect: Allow
+              Action: lambda:InvokeFunction
+              Resource: !Sub arn:aws:lambda:*:${AWS::AccountId}:function:${FunctionBaseName}*
+      RoleName: !Sub '${FunctionBaseName}ServiceRole'
+# -- IAM Service Role
 # -- SynarenChatGetChatSessionFunction
   SynarenChatGetChatSessionPermission:
     Type: AWS::Lambda::Permission
@@ -161,12 +213,12 @@ Resources:
       Runtime: nodejs8.10
       Timeout: 180
       MemorySize: 128
-      FunctionName: 'SynarenChatGetChatSession'
+      FunctionName: !Sub '${FunctionBaseName}GetChatSession'
       Handler: SynarenChatGetChatSessionFunction.handler
-      Role: arn:aws:iam::960300581623:role/service-role/cloud-chat
+      Role: !GetAtt SynarenChatServiceRole.Arn
       Tags:
         - Key: application
-          Value: SynarenChat
+          Value: !Sub ${FunctionBaseName}
       Layers:
         - !Ref SynarenChatLayer
   SynarenChatGetChatSessionMethod:
@@ -186,7 +238,7 @@ Resources:
             method.response.header.Content-Length: true
             method.response.header.Content-Type: true
             method.response.header.Connection: true
-      OperationName: SynarenChatGetChatSessionMethod
+      OperationName: !Sub ${FunctionBaseName}GetChatSessionMethod
       ResourceId: !Ref SynarenChatResource3
       RestApiId: !Ref SynarenChatApi
 # -- SynarenChatGetChatSessionFunction
@@ -208,12 +260,12 @@ Resources:
       Runtime: nodejs8.10
       Timeout: 180
       MemorySize: 128
-      FunctionName: 'SynarenChatPostMessage'
+      FunctionName: !Sub '${FunctionBaseName}PostMessage'
       Handler: SynarenChatPostMessageFunction.handler
-      Role: arn:aws:iam::960300581623:role/service-role/cloud-chat
+      Role: !GetAtt SynarenChatServiceRole.Arn
       Tags:
         - Key: application
-          Value: SynarenChat
+          Value: !Sub ${FunctionBaseName}
       Layers:
         - !Ref SynarenChatLayer
   SynarenChatPostMessageMethod:
@@ -233,7 +285,7 @@ Resources:
             method.response.header.Content-Length: true
             method.response.header.Content-Type: true
             method.response.header.Connection: true
-      OperationName: SynarenChatPostMessageMethod
+      OperationName: !Sub ${FunctionBaseName}PostMessageMethod
       ResourceId: !Ref SynarenChatResource3
       RestApiId: !Ref SynarenChatApi
 # -- SynarenChatPostMessageFunction
@@ -255,12 +307,12 @@ Resources:
       Runtime: nodejs8.10
       Timeout: 180
       MemorySize: 128
-      FunctionName: 'SynarenChatGetUsersSession'
+      FunctionName: !Sub '${FunctionBaseName}GetUsersSession'
       Handler: SynarenChatGetUsersSessionFunction.handler
-      Role: arn:aws:iam::960300581623:role/service-role/cloud-chat
+      Role: !GetAtt SynarenChatServiceRole.Arn
       Tags:
         - Key: application
-          Value: SynarenChat
+          Value: !Sub ${FunctionBaseName}
       Layers:
         - !Ref SynarenChatLayer
   SynarenChatGetUsersSessionMethod:
@@ -280,7 +332,7 @@ Resources:
             method.response.header.Content-Length: true
             method.response.header.Content-Type: true
             method.response.header.Connection: true
-      OperationName: SynarenChatGetUsersSessionMethod
+      OperationName: !Sub ${FunctionBaseName}GetUsersSessionMethod
       ResourceId: !Ref SynarenChatResource31
       RestApiId: !Ref SynarenChatApi
 # -- SynarenChatGetUsersSessionFunction
@@ -295,12 +347,12 @@ Resources:
       Runtime: nodejs8.10
       Timeout: 180
       MemorySize: 128
-      FunctionName: 'SynarenChatAddActiveUser'
+      FunctionName: !Sub '${FunctionBaseName}AddActiveUser'
       Handler: SynarenChatAddActiveUserFunction.handler
-      Role: arn:aws:iam::960300581623:role/service-role/cloud-chat
+      Role: !GetAtt SynarenChatServiceRole.Arn
       Tags:
         - Key: application
-          Value: SynarenChat
+          Value: !Sub ${FunctionBaseName}
       Layers:
         - !Ref SynarenChatLayer
 # -- SynarenChatAddActiveUserFunction
@@ -315,12 +367,12 @@ Resources:
       Runtime: nodejs8.10
       Timeout: 180
       MemorySize: 128
-      FunctionName: 'SynarenChatCleanSessions'
+      FunctionName: !Sub '${FunctionBaseName}CleanSessions'
       Handler: SynarenChatCleanSessionsFunction.handler
-      Role: arn:aws:iam::960300581623:role/service-role/cloud-chat
+      Role: !GetAtt SynarenChatServiceRole.Arn
       Tags:
         - Key: application
-          Value: SynarenChat
+          Value: !Sub ${FunctionBaseName}
       Layers:
         - !Ref SynarenChatLayer
   SynarenChatCleanSessionsSchedule:
@@ -329,7 +381,7 @@ Resources:
     Properties:
       ScheduleExpression: "rate(12 hours)"
       Targets:
-      - Id: SynarenChatCleanSessionsSchedule
+      - Id: !Sub ${FunctionBaseName}CleanSessionsSchedule
         Arn: !GetAtt SynarenChatCleanSessionsFunction.Arn
   SynarenChatCleanSessionsPermission:
     Type: AWS::Lambda::Permission
