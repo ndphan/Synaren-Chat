@@ -6,6 +6,9 @@ Resources:
     Type: AWS::ApiGateway::RestApi
     Properties:
         Name: 'SynarenChat'
+        EndpointConfiguration:
+          Types: 
+          - "REGIONAL"
   SynarenChatResource1:
     DependsOn: SynarenChatApi
     Type: AWS::ApiGateway::Resource
