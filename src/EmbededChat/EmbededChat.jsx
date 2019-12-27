@@ -242,74 +242,222 @@ const EmbededChat = (props) => {
 
   return (
     <ChatContainer>
-      <form className="uk-form-stacked" uk-grid="true">
+      <button
+        style={{ position: "absolute", top: "10px", right: "10px", background: 'transparent' }}
+        type="button"
+        className="uk-hidden@s uk-button"
+        uk-toggle="target: #chat-details; mode: click; media: @s; cls: uk-visible@s"
+      >
+        <span uk-icon="icon: more"></span>
+      </button>
+      <form id="chat-details" className="uk-form-stacked uk-visible@s" uk-grid="true">
         <div>
-          <label className="uk-form-label" style={{paddingTop:"5px"}} htmlFor="nickname-text">Nickname</label>
-          <input 
-            id="nickname-text" 
+          <label
+            className="uk-form-label"
+            style={{ paddingTop: "5px" }}
+            htmlFor="nickname-text"
+          >
+            Nickname
+          </label>
+          <input
+            id="nickname-text"
             onChange={e => setNickname(e.target.value)}
-            onBlur={e => updateNicknameQueryParam(e.target.value)} 
-            className="uk-input uk-form-width-medium uk-form-small" type="text" value={nickname}
+            onBlur={e => updateNicknameQueryParam(e.target.value)}
+            className="uk-input uk-form-width-medium uk-form-small"
+            type="text"
+            value={nickname}
           />
         </div>
         <div className="uk-margin-remove">
-          <label className="uk-form-label" style={{paddingTop:"5px"}} htmlFor="session-id-text">Session Id</label>
-          <input 
-            id="session-id-text" 
+          <label
+            className="uk-form-label"
+            style={{ paddingTop: "5px" }}
+            htmlFor="session-id-text"
+          >
+            Session Id
+          </label>
+          <input
+            id="session-id-text"
             onChange={e => setSessionId(e.target.value)}
-            onBlur={e => updateSessionIdQueryParam(e.target.value) && sessionId !== getSessionId() ? setIsLoadSession(true) : undefined} 
-            className="uk-input uk-form-width-medium uk-form-small" type="text" value={sessionId}
-          />
-          <a style={{marginLeft:"4px"}} href="#/" className="uk-link-text" onClick={_ => {
-            shareLink(sessionId, randomNickname()).then(_ => {
-              setIsShareLinkToggle(true);
-              setTimeout(_ => setIsShareLinkToggle(false), 1000);
-            })
+            onBlur={e =>
+              updateSessionIdQueryParam(e.target.value) &&
+              sessionId !== getSessionId()
+                ? setIsLoadSession(true)
+                : undefined
             }
-          }>
-          {
-            isShareLinkToggle ? 
-            <svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" data-svg="check"><polyline fill="none" stroke="#008000" strokeWidth="1.1" points="4,10 8,15 17,4"></polyline></svg> 
-            : <svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" data-svg="link"><path fill="none" stroke="#000" strokeWidth="1.1" d="M10.625,12.375 L7.525,15.475 C6.825,16.175 5.925,16.175 5.225,15.475 L4.525,14.775 C3.825,14.074 3.825,13.175 4.525,12.475 L7.625,9.375"></path><path fill="none" stroke="#000" strokeWidth="1.1" d="M9.325,7.375 L12.425,4.275 C13.125,3.575 14.025,3.575 14.724,4.275 L15.425,4.975 C16.125,5.675 16.125,6.575 15.425,7.275 L12.325,10.375"></path><path fill="none" stroke="#000" strokeWidth="1.1" d="M7.925,11.875 L11.925,7.975"></path></svg>
-          }
-         </a>
-         <a style={{marginLeft:"4px"}} href="#/" className="uk-link-text" onClick={_ => {setSessionId('');updateSessionIdQueryParam('');setIsLoadSession(true);}}>
-          <svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" data-svg="refresh"><path fill="none" stroke="#000" strokeWidth="1.1" d="M17.08,11.15 C17.09,11.31 17.1,11.47 17.1,11.64 C17.1,15.53 13.94,18.69 10.05,18.69 C6.16,18.68 3,15.53 3,11.63 C3,7.74 6.16,4.58 10.05,4.58 C10.9,4.58 11.71,4.73 12.46,5"></path><polyline fill="none" stroke="#000" points="9.9 2 12.79 4.89 9.79 7.9"></polyline></svg>
-         </a>
+            className="uk-input uk-form-width-medium uk-form-small"
+            type="text"
+            value={sessionId}
+          />
+          <a
+            style={{ marginLeft: "4px" }}
+            href="#/"
+            className="uk-link-text"
+            onClick={_ => {
+              shareLink(sessionId, randomNickname()).then(_ => {
+                setIsShareLinkToggle(true);
+                setTimeout(_ => setIsShareLinkToggle(false), 1000);
+              });
+            }}
+          >
+            {isShareLinkToggle ? (
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 20 20"
+                xmlns="http://www.w3.org/2000/svg"
+                data-svg="check"
+              >
+                <polyline
+                  fill="none"
+                  stroke="#008000"
+                  strokeWidth="1.1"
+                  points="4,10 8,15 17,4"
+                ></polyline>
+              </svg>
+            ) : (
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 20 20"
+                xmlns="http://www.w3.org/2000/svg"
+                data-svg="link"
+              >
+                <path
+                  fill="none"
+                  stroke="#000"
+                  strokeWidth="1.1"
+                  d="M10.625,12.375 L7.525,15.475 C6.825,16.175 5.925,16.175 5.225,15.475 L4.525,14.775 C3.825,14.074 3.825,13.175 4.525,12.475 L7.625,9.375"
+                ></path>
+                <path
+                  fill="none"
+                  stroke="#000"
+                  strokeWidth="1.1"
+                  d="M9.325,7.375 L12.425,4.275 C13.125,3.575 14.025,3.575 14.724,4.275 L15.425,4.975 C16.125,5.675 16.125,6.575 15.425,7.275 L12.325,10.375"
+                ></path>
+                <path
+                  fill="none"
+                  stroke="#000"
+                  strokeWidth="1.1"
+                  d="M7.925,11.875 L11.925,7.975"
+                ></path>
+              </svg>
+            )}
+          </a>
+          <a
+            style={{ marginLeft: "4px" }}
+            href="#/"
+            className="uk-link-text"
+            onClick={_ => {
+              setSessionId("");
+              updateSessionIdQueryParam("");
+              setIsLoadSession(true);
+            }}
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              xmlns="http://www.w3.org/2000/svg"
+              data-svg="refresh"
+            >
+              <path
+                fill="none"
+                stroke="#000"
+                strokeWidth="1.1"
+                d="M17.08,11.15 C17.09,11.31 17.1,11.47 17.1,11.64 C17.1,15.53 13.94,18.69 10.05,18.69 C6.16,18.68 3,15.53 3,11.63 C3,7.74 6.16,4.58 10.05,4.58 C10.9,4.58 11.71,4.73 12.46,5"
+              ></path>
+              <polyline
+                fill="none"
+                stroke="#000"
+                points="9.9 2 12.79 4.89 9.79 7.9"
+              ></polyline>
+            </svg>
+          </a>
         </div>
       </form>
-      <div style={{width:"100%", maxHeight:"24px"}}>
-        <Avatar className="uk-animation-slide-top-small" color={stringToRGB(getCorrelationId())} key={-1} style={{paddingLeft:'5px',marginLeft:'-5px'}} name={nickname} round={true} size={20}/>
-          {usersInSession && usersInSession.length > 0 ? usersInSession.filter(user => user.correlationId !== getCorrelationId()).map((user, index) => <Avatar className="uk-animation-slide-top-small" color={stringToRGB(user.username)} key={index} style={{marginLeft:'-5px'}} name={user.username} round={true} size={20}/>)
-          : <div style={{height:"24px"}}></div>}
+      <div style={{ width: "100%", maxHeight: "24px" }}>
+        <Avatar
+          className="uk-animation-slide-top-small"
+          color={stringToRGB(getCorrelationId())}
+          key={-1}
+          style={{ paddingLeft: "5px", marginLeft: "-5px" }}
+          name={nickname}
+          round={true}
+          size={20}
+        />
+        {usersInSession && usersInSession.length > 0 ? (
+          usersInSession
+            .filter(user => user.correlationId !== getCorrelationId())
+            .map((user, index) => (
+              <Avatar
+                className="uk-animation-slide-top-small"
+                color={stringToRGB(user.username)}
+                key={index}
+                style={{ marginLeft: "-5px" }}
+                name={user.username}
+                round={true}
+                size={20}
+              />
+            ))
+        ) : (
+          <div style={{ height: "24px" }}></div>
+        )}
       </div>
-      <hr style={{margin:0, marginTop:"3px"}}/>
-      {
-        (messages && messages.length === 0) ? 
-        <div uk-alert="true" style={{position:"absolute"}}>
+      <hr style={{ margin: 0, marginTop: "3px" }} />
+      {messages && messages.length === 0 ? (
+        <div uk-alert="true" style={{ position: "absolute" }}>
           <h3>Your chat session</h3>
           <p>
             Share this chat session with others to begin chatting.
-            <br/>
+            <br />
             You can configure your nickname or change sessions above.
-            <br/>
+            <br />
             Chat sessions are destroyed after a certain amount of time.
           </p>
         </div>
-        : undefined
-      }
+      ) : (
+        undefined
+      )}
       <CommentListContainer id={chatContainerId}>
-        <ul className="uk-nav">
-          {groupMessages()}
-        </ul>
+        <ul className="uk-nav">{groupMessages()}</ul>
       </CommentListContainer>
-      <hr/>
-      <form onSubmit={e => {e.preventDefault(); sendMessage();}}>
-        <textarea value={newMessage} onFocus={e => e.target.focus()} onChange={e => setNewMessage(e.target.value)} style={{resize:"none",height:"36px"}} className="uk-textarea uk-form-width-medium uk-width-3-4@s uk-width-3-5" type="text"></textarea>
-        <button style={{height:"36px"}} className="uk-button uk-button-primary uk-width-1-4@s uk-width-2-5">Submit {isLoading ? <div uk-spinner="ratio: 0.5" style={{position:"absolute",padding:"11px 0",paddingLeft: "20px"}}/> : undefined}</button>
+      <hr />
+      <form
+        onSubmit={e => {
+          e.preventDefault();
+          sendMessage();
+        }}
+      >
+        <textarea
+          value={newMessage}
+          onFocus={e => e.target.focus()}
+          onChange={e => setNewMessage(e.target.value)}
+          style={{ resize: "none", height: "36px" }}
+          className="uk-textarea uk-form-width-medium uk-width-3-4@s uk-width-3-5"
+          type="text"
+        ></textarea>
+        <button
+          style={{ height: "36px" }}
+          className="uk-button uk-button-primary uk-width-1-4@s uk-width-2-5"
+        >
+          Submit{" "}
+          {isLoading ? (
+            <div
+              uk-spinner="ratio: 0.5"
+              style={{
+                position: "absolute",
+                padding: "11px 0",
+                paddingLeft: "20px"
+              }}
+            />
+          ) : (
+            undefined
+          )}
+        </button>
       </form>
     </ChatContainer>
-  )
+  );
 }
 
 EmbededChat.propTypes = {};

@@ -11,7 +11,8 @@ export const CommentContainer = styled.div`
 
 export const CommentListContainer = styled.div`
 	max-height: 0;
-	min-height: 400px;
+	min-height: 200px;
+	min-height: 60vh;
 	overflow: auto;
 	padding: 0 20px;
 	padding-top: 10px;
