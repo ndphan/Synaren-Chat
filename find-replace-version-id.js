@@ -4,10 +4,12 @@ const productionFile = "./.env.production";
 const developFile = "./.env.production";
 
 function randomBuildId() {
-	return 'xxxx-xxxx'.replace(/[xy]/g, char => {
-			var r = Math.random() * 16 | 0, v = char == 'x' ? r : (r & 0x3 | 0x8);
-			return v.toString(16);
+	const date = new Date().toISOString().split('T')[0];
+	const randomHash = 'xxxx'.replace(/[xy]/g, char => {
+		const r = Math.random() * 16 | 0, v = char == 'x' ? r : (r & 0x3 | 0x8);
+		return v.toString(16);
 	});
+	return `${date}-${randomHash}`
 }
 
 fs.readFile(productionFile, 'utf8', (err, data) => {
