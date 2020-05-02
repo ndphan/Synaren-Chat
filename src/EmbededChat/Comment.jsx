@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { CommentContainer } from './EmbededChat.styles';
 import moment from 'moment';
-import { stringToRGB } from '../Sevices/common';
+import { stringToRGB } from '../Service/common';
 
 
 const Comment = (props) => {

@@ -1,5 +1,5 @@
 import config from "../Config/url.config.json";
-import { send, copyTextToClipboard } from "../Sevices/common";
+import { send, copyTextToClipboard } from "../Service/common";
 import { DeviceUUID } from "device-uuid";
 import moment from "moment";
 const API_KEY = {

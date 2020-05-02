@@ -3,12 +3,12 @@ import Comment from './Comment';
 import { ChatContainer, CommentListContainer } from './EmbededChat.styles';
 import { getSession, performSend, shareLink, getUsersSession, getCorrelationId } from './ChatService';
 import queryString from 'query-string';
-import randomWords from '../Sevices/random-words';
+import randomWords from '../Service/random-words';
 import moment from 'moment';
 import UIkit from 'uikit';
 import ifvisible from 'ifvisible.js';
 import Avatar from 'react-avatar';
-import { stringToRGB } from '../Sevices/common';
+import { stringToRGB } from '../Service/common'
 
 ifvisible.setIdleDuration(30);
 
