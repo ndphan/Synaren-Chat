@@ -1,0 +1,3 @@
+DynamodbTableBaseName=chat-session
+FunctionBaseName=SynarenChat
+CustomDomainName=api.synaren-app.com

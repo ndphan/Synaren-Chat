@@ -9,6 +9,9 @@ Parameters:
   FunctionBaseName:
     Type: String
     Description: Base name of the function e.g SynarenChat
+  CustomDomainName:
+    Type: String
+    Description: Custom domain name url
 Resources: 
 # -- Gateway
   SynarenChatApi:
@@ -23,7 +26,7 @@ Resources:
     Type: AWS::ApiGateway::Resource
     Properties:
       ParentId: !GetAtt SynarenChatApi.RootResourceId
-      PathPart: 'synaren'
+      PathPart: 'v1'
       RestApiId: !Ref SynarenChatApi
   SynarenChatResource2:
     DependsOn: SynarenChatResource1
@@ -59,7 +62,7 @@ Resources:
     Properties:
       ApiStages: 
       - ApiId: !Ref SynarenChatApi
-        Stage: v1
+        Stage: prod
       Quota:
         Limit: 400000
         Period: MONTH
@@ -149,8 +152,7 @@ Resources:
       Description: 'Synaren Chat layer'
       Content: '../layers'
       CompatibleRuntimes:
-        - nodejs6.10
-        - nodejs8.10
+        - nodejs12.x
 # -- Layers
 # -- IAM Service Role
   SynarenChatServiceRole:
@@ -210,7 +212,7 @@ Resources:
     Properties:
       Code: '../code/SynarenChatGetChatSessionFunction.js'
       Description: 'Get chat session by session id or create a new one'
-      Runtime: nodejs8.10
+      Runtime: nodejs12.x
       Timeout: 180
       MemorySize: 128
       FunctionName: !Sub '${FunctionBaseName}GetChatSession'
@@ -257,7 +259,7 @@ Resources:
     Properties:
       Code: '../code/SynarenChatPostMessageFunction.js'
       Description: 'Post a message to a chat session'
-      Runtime: nodejs8.10
+      Runtime: nodejs12.x
       Timeout: 180
       MemorySize: 128
       FunctionName: !Sub '${FunctionBaseName}PostMessage'
@@ -304,7 +306,7 @@ Resources:
     Properties:
       Code: '../code/SynarenChatGetUsersSessionFunction.js'
       Description: 'Get all users in session'
-      Runtime: nodejs8.10
+      Runtime: nodejs12.x
       Timeout: 180
       MemorySize: 128
       FunctionName: !Sub '${FunctionBaseName}GetUsersSession'
@@ -344,7 +346,7 @@ Resources:
     Properties:
       Code: '../code/SynarenChatAddActiveUserFunction.js'
       Description: 'Add a user to a session'
-      Runtime: nodejs8.10
+      Runtime: nodejs12.x
       Timeout: 180
       MemorySize: 128
       FunctionName: !Sub '${FunctionBaseName}AddActiveUser'
@@ -364,7 +366,7 @@ Resources:
     Properties:
       Code: '../code/SynarenChatCleanSessionsFunction.js'
       Description: 'Add a user to a session'
-      Runtime: nodejs8.10
+      Runtime: nodejs12.x
       Timeout: 180
       MemorySize: 128
       FunctionName: !Sub '${FunctionBaseName}CleanSessions'
@@ -398,5 +400,13 @@ Resources:
     Type: AWS::ApiGateway::Deployment
     Properties:
       RestApiId: !Ref SynarenChatApi
-      StageName: v1
+      StageName: prod
 # -- Deploy
+# -- Custom Domain Name
+  SynarenChatMapping:
+    Type: 'AWS::ApiGateway::BasePathMapping'
+    Properties:
+      DomainName: !Ref CustomDomainName
+      RestApiId: !Ref SynarenChatApi
+      BasePath: 'synaren-chat'
+# -- Custom Domain Name

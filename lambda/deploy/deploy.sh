@@ -6,6 +6,4 @@ aws cloudformation deploy \
   --template-file package.yaml \
   --stack-name SynarenChat \
   --capabilities CAPABILITY_NAMED_IAM \
-  --parameter-overrides \
-      DynamodbTableBaseName=chat-session \
-      FunctionBaseName=SynarenChat
+  --parameter-overrides $(cat parameters)
